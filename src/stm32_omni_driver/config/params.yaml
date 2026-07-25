@@ -1,0 +1,13 @@
+stm32_omni_driver:
+  ros__parameters:
+
+    port: "/dev/ttyACM0"
+    baudrate: 115200
+
+    max_pwm: 255
+
+    forward_gain: 0.5
+    strafe_gain: 0.5
+    rotation_gain: 0.3
+
+    cmd_timeout: 0.5

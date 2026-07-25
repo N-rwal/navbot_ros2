@@ -1,0 +1,2 @@
+ros2 launch ldlidar ldlidar.launch.py serial_port:=/dev/ttyUSB0
+
