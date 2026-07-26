@@ -1,2 +1,4 @@
 ros2 launch ldlidar ldlidar.launch.py serial_port:=/dev/ttyUSB0
 
+Launch robot node:
+ros2 launch navbot_bringup robot.launch.py

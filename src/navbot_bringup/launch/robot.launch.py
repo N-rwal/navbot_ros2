@@ -45,6 +45,18 @@ def generate_launch_description():
         ]
     )
 
+    imu = Node(
+        package='imu_mpu6050',
+        executable='mpu6050_node',
+        name='mpu6050_node',
+        output='screen',
+        parameters=[
+            {
+                'publish_rate': 50.0
+            }
+        ]
+    )
+
     rf2o = Node(
         package='rf2o_laser_odometry',
         executable='rf2o_laser_odometry_node',
@@ -65,11 +77,11 @@ def generate_launch_description():
 
     slam = IncludeLaunchDescription(
 	    PythonLaunchDescriptionSource(
-		os.path.join(
-		    get_package_share_directory('slam_toolbox'),
-		    'launch',
-		    'online_async_launch.py'
-		)
+            os.path.join(
+                get_package_share_directory('slam_toolbox'),
+                'launch',
+                'online_async_launch.py'
+            )
 	    ),
 	    launch_arguments={
 		'slam_params_file': os.path.join(
@@ -84,6 +96,7 @@ def generate_launch_description():
     return LaunchDescription([
         lidar,
         laser_tf,
+        imu,
         #rf2o,
         motor_driver,
         #slam
