@@ -13,3 +13,8 @@ ROS2 Jazzy workspace for an omniwheel navigation robot.
 - STM32 motor controller
 - LD06 LiDAR
 - 4-wheel omni chassis
+
+### Install
+	```bash
+	git clone --recurse-submodules git@github.com:N-rwal/navbot_ros2.git
+	```
