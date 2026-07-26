@@ -37,9 +37,9 @@ def generate_launch_description():
             '0',     # x
             '0',     # y
             '0.15',  # z
-            '0',     # roll
+            '3.14159',     # roll
             '0',     # pitch
-            '3.14159',     # yaw
+            '0',     # yaw
             'base_link',
             'laser'
         ]
