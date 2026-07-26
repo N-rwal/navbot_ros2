@@ -11,4 +11,4 @@ rf2o_laser_odometry:
 
     init_pose_from_topic: ""
 
-    freq: 10.0
+    freq: 5.0
