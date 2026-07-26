@@ -20,6 +20,8 @@
   <exec_depend>ldlidar</exec_depend>
   <exec_depend>rf2o_laser_odometry</exec_depend>
 
+  <exec_depend>robot_localization</exec_depend>
+
 
   <export>
     <build_type>ament_python</build_type>
