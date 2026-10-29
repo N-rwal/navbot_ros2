@@ -2,3 +2,6 @@ ros2 launch ldlidar ldlidar.launch.py serial_port:=/dev/ttyUSB0
 
 Launch robot node:
 ros2 launch navbot_bringup robot.launch.py
+
+Bus 005 Device 002: ID 10c4:ea60 Silicon Labs CP210x UART Bridge
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="mylidar"

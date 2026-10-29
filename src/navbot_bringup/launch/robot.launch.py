@@ -15,47 +15,58 @@ def generate_launch_description():
     config_dir = FindPackageShare('navbot_bringup')
 
     slam_params = PathJoinSubstitution(
-        [config_dir, 'config', 'slam.yaml']
-    )
+         [config_dir, 'config', 'slam.yaml']
+     )
 
     rf2o_params = PathJoinSubstitution(
-        [config_dir, 'config', 'rf2o.yaml']
+         [config_dir, 'config', 'rf2o.yaml']
+     )
+
+    ekf_params = PathJoinSubstitution(
+        [config_dir, 'config', 'ekf.yaml']
     )
 
     lidar = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             FindPackageShare('ldlidar'),
-            '/launch/ldlidar.launch.py'
-        ])
-    )
+             '/launch/ldlidar.launch.py'
+         ])
+     )
 
     laser_tf = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_to_laser_tf',
         arguments=[
-            '0',     # x
-            '0',     # y
-            '0.15',  # z
-            '3.14159',     # roll
-            '0',     # pitch
-            '0',     # yaw
+             '0',      # x
+             '0',      # y
+             '0.15',   # z offset (laser 15cm above base plane)
+             '0',      # roll — set to 0 (was 3.14159)
+             '0',      # pitch
+             '0',      # yaw
+             'base_link',
+             'laser'
+        ]
+     )
+
+    imu_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_to_imu_tf',
+        arguments=[
+            '0', '0', '0',
+            '0', '0', '0',
             'base_link',
-            'laser'
+            'imu_link'
         ]
     )
 
     imu = Node(
-        package='imu_mpu6050',
-        executable='mpu6050_node',
-        name='mpu6050_node',
+        package='imu_ros2_device',
+        executable='ybimu_driver',
+        name='ybimu_driver',
         output='screen',
-        parameters=[
-            {
-                'publish_rate': 50.0
-            }
-        ]
-    )
+     )
 
     rf2o = Node(
         package='rf2o_laser_odometry',
@@ -63,7 +74,7 @@ def generate_launch_description():
         name='rf2o_laser_odometry',
         output='screen',
         parameters=[rf2o_params]
-    )
+     )
 
     motor_driver = Node(
         package='stm32_omni_driver',
@@ -71,33 +82,47 @@ def generate_launch_description():
         name='stm32_omni_driver',
         output='screen',
         parameters=[
-            '/home/orangepi/ros2_ws/src/stm32_omni_driver/config/params.yaml'
+             '/home/orangepi/ros2_ws/src/stm32_omni_driver/config/params.yaml'
         ]
-    )
+     )
 
     slam = IncludeLaunchDescription(
-	    PythonLaunchDescriptionSource(
+        PythonLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory('slam_toolbox'),
-                'launch',
-                'online_async_launch.py'
+                 'launch',
+                 'online_async_launch.py'
             )
-	    ),
-	    launch_arguments={
-		'slam_params_file': os.path.join(
-		    get_package_share_directory('navbot_bringup'),
-		    'config',
-		    'slam.yaml'
-		),
-		'use_sim_time': 'false',
-	    }.items()
-	)
+        ),
+        launch_arguments={
+            'slam_params_file': os.path.join(
+                get_package_share_directory('navbot_bringup'),
+                 'config',
+                 'slam.yaml'
+            ),
+            'use_sim_time': 'false',
+         }.items()
+    )
+
+    # EKF fusion node: fuses /odom_rf2o (LiDAR pose) + IMU (yaw anchor)
+    ekf = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[ekf_params],
+        remappings=[
+            ('odometry/filtered', '/odom')
+        ]
+    )
 
     return LaunchDescription([
         lidar,
         laser_tf,
+        imu_tf,
         imu,
-        #rf2o,
+        rf2o,
         motor_driver,
-        #slam
+        slam,
+        ekf
     ])

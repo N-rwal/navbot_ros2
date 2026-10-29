@@ -115,11 +115,11 @@ def generate_launch_description():
 	)
 
     return LaunchDescription([
-        #lidar,
-        #laser_tf,
+        lidar,
+        laser_tf,
         rf2o,
         ekf,
         #fake_odom_tf,
-        #motor_driver,
+        motor_driver,
         slam
     ])

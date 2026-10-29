@@ -1,8 +1,54 @@
+# ekf_filter_node:
+#   ros__parameters:
+#
+#     frequency: 30.0
+#     sensor_timeout: 0.1
+#
+#     two_d_mode: true
+#     publish_tf: true
+#
+#     map_frame: map
+#     odom_frame: odom
+#     base_link_frame: base_link
+#     world_frame: odom
+#
+#     odom0: /odom_rf2o
+#
+#
+#     odom0_config: [
+#         true,  true,  false,
+#         false, false, false,
+#         true,  true,  false,
+#         false, false, false,
+#         false, false, false
+#     ]
+#
+#
+#     odom0_differential: false
+#     odom0_relative: false
+#
+#     imu0: /imu/data_raw
+#
+#     imu0_config: [
+#         false, false, false,   # position
+#         false, false, false,   # roll pitch yaw
+#         false, false, false,   # linear velocity
+#         false, false, true,    # angular velocity Z
+#         false, false, false,   # linear acceleration
+#     ]
+#
+#     imu0_remove_gravitational_acceleration: false
+#     predict_to_current_time: true
+#
+#     imu0_differential: false
+#     imu0_relative: false
+#
+#     use_control: false
 ekf_filter_node:
   ros__parameters:
 
-    frequency: 30.0
-    sensor_timeout: 0.1
+    frequency: 15.0
+    sensor_timeout: 0.3
 
     two_d_mode: true
     publish_tf: true
@@ -12,35 +58,43 @@ ekf_filter_node:
     base_link_frame: base_link
     world_frame: odom
 
+    # --- Odom Source (RF2O) ---
     odom0: /odom_rf2o
 
-
+    # Config: [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az]
+    # Fuse position (x, y) and forward velocity (vx) from RF2O.
     odom0_config: [
-        true,  true,  false,
-        false, false, false,
-        true,  true,  false,
-        false, false, false,
-        false, false, false
+        true,  true,  false,   # x, y
+        false, false, false,   # roll, pitch, yaw
+        true,  false, false,   # vx, vy
+        false, false, false,   # vroll, vpitch, vyaw
+        false, false, false    # ax, ay, az
     ]
-
 
     odom0_differential: false
     odom0_relative: false
+    odom0_queue_size: 10
 
+    # --- IMU Source (Yahboom 9-DOF) ---
     imu0: /imu/data_raw
 
+    # Config: [x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az]
+    # Fuse startup-relative yaw (index 5) and yaw rate (index 11) from the IMU.
     imu0_config: [
-        false, false, false,   # position
-        false, false, false,   # roll pitch yaw
-        false, false, false,   # linear velocity
-        false, false, true,    # angular velocity Z
-        false, false, false,   # linear acceleration
+        false, false, false,   # x, y, z
+        false, false, true,    # roll, pitch, yaw
+        false, false, false,   # vx, vy, vz
+        false, false, true,    # vroll, vpitch, vyaw
+        false, false, false    # ax, ay, az
     ]
 
-    imu0_remove_gravitational_acceleration: false
-    predict_to_current_time: true
-
     imu0_differential: false
-    imu0_relative: false
+    imu0_relative: true
+    imu0_queue_size: 10
+    imu0_remove_gravitational_acceleration: true
 
+    predict_to_current_time: true
     use_control: false
+
+    # Optional but recommended for debugging
+    print_diagnostics: true
