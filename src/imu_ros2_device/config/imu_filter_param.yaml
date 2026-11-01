@@ -1,7 +1,9 @@
 imu_filter_madgwick:
     ros__parameters:
-        fixed_frame: "imu_frame"
-        use_mag: false
+        fixed_frame: "imu_link"
+        use_mag: true
         publish_tf: false
         world_frame: "enu"
-        orientation_stddev: 0.01
+        orientation_stddev: 0.15
+        gain: 0.1
+        zeta: 0.0

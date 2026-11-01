@@ -133,7 +133,10 @@ gain: 0.1                  # Madgwick correction gain; larger = faster, noisier
 zeta: 0.0                  # gyro-bias estimation gain
 ```
 - Consumes `/imu/data_raw` + `/imu/mag`, publishes `/imu/data` (ApproximateTime sync; driver stamps both identically).
-- Post-rotation convergence (~seconds) is the Madgwick correction time constant; the EKF's `imu0` yaw trust (`orientation_stddev`) controls how much that drags the estimate.
+- Post-rotation yaw drift is present in **`/imu/data_raw` itself** (the sensor's internal quaternion), so it is upstream of the host Madgwick filter and the Pi. The host filter output shows the same behaviour. Pi CPU is not the cause (<40% during launch).
+- Report-rate tests: 10 Hz is clearly worse; 50 Hz and 80 Hz showed no meaningful improvement over 30 Hz. **30 Hz retained.**
+- Sensor-side levers exist in `YbImuSerialLib` but are **not wired into the driver yet**: `calibration_imu()` (gyro+accel, needs the robot level and still, ~7 s; call after the receive thread starts), `calibration_mag()` (blocks indefinitely, needs the vendor rotation procedure), `set_algo_type(6|9)` (6-axis vs 9-axis internal fusion). `reset_user_data()` clears all calibration — do not use casually.
+- A gyro dead-zone/exponential-decay and a first-order LPF were considered and **not adopted**: at 50 Hz a 0.9/tick decay has a ~2 s tail (would recreate the symptom), and alpha 0.1–0.2 adds too much phase lag for yaw.
 
 ## Parameters
 
@@ -166,6 +169,7 @@ Current EKF: `odom0` x,y true (yaw false); `imu0` yaw + vyaw true.
 - Don't run two `robot.launch.py` instances — serial contention; also leaves stale DDS graph entries (duplicate node names in `ros2 node list`).
 - `navbot_bringup` and `imu_ros2_device` register only console scripts in `setup.py`; adding a node needs a `console_scripts` entry.
 - Keep `/imu/mag` and `/imu/data_raw` frame `imu_link`; the filter and EKF rely on the static `base_link→imu_link` TF.
+- Post-stop yaw drift in `odom→base_link` comes from the sensor's internal quaternion (`/imu/data_raw`), not from slam_toolbox or the host filter. Do not chase it with Pi-side filtering or report-rate changes; the remaining levers are IMU calibration and `set_algo_type`.
 - No secrets/credentials in this file or repo.
 
 ## Verify

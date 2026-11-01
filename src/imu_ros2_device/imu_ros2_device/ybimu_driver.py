@@ -35,6 +35,7 @@ class ybimu_driver(Node):
         if self.robot is None:
             self.get_logger().error("---------Fail To Open Ybimu Serial------------")
             return
+        self.robot.set_report_rate(30)
         self.robot.create_receive_threading()
 
         # create publisher
@@ -44,7 +45,7 @@ class ybimu_driver(Node):
         self.eulerPublisher = self.create_publisher(Float32MultiArray, "euler", 100)
 
         # create timer
-        self.timer = self.create_timer(0.1, self.pub_data)
+        self.timer = self.create_timer(1.0 / 30.0, self.pub_data)
 
 
     # pub data
@@ -104,7 +105,7 @@ class ybimu_driver(Node):
         mag.header.stamp = time_stamp.to_msg()
         mag.header.frame_id = "imu_link"
         mag.magnetic_field.x = mx * 1.0
-        mag.magnetic_field.y = -my * 1.0
+        mag.magnetic_field.y = my * 1.0
         mag.magnetic_field.z = mz * 1.0
 
         baro.data = [height, temperature, pressure, pressure_contrast]

@@ -26,6 +26,10 @@ def generate_launch_description():
         [config_dir, 'config', 'ekf.yaml']
     )
 
+    imu_filter_params = PathJoinSubstitution(
+        [FindPackageShare('imu_ros2_device'), 'config', 'imu_filter_param.yaml']
+    )
+
     lidar = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             FindPackageShare('ldlidar'),
@@ -38,12 +42,12 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='base_to_laser_tf',
         arguments=[
-             '0',      # x
+             '0.05',   # x
              '0',      # y
              '0.15',   # z offset (laser 15cm above base plane)
-             '0',      # roll — set to 0 (was 3.14159)
-             '0',      # pitch
-             '0',      # yaw
+             '0',      # roll — set to 0 (was 3.14159) /by test visually confirmed yaw ??
+             '0',      # pitch 1.570795
+             '0',      # yaw /by test visually confirmed roll ??
              'base_link',
              'laser'
         ]
@@ -66,6 +70,14 @@ def generate_launch_description():
         executable='ybimu_driver',
         name='ybimu_driver',
         output='screen',
+     )
+
+    imu_filter = Node(
+        package='imu_filter_madgwick',
+        executable='imu_filter_madgwick_node',
+        name='imu_filter_madgwick',
+        output='screen',
+        parameters=[imu_filter_params]
      )
 
     rf2o = Node(
@@ -121,6 +133,7 @@ def generate_launch_description():
         laser_tf,
         imu_tf,
         imu,
+        imu_filter,
         rf2o,
         motor_driver,
         slam,
